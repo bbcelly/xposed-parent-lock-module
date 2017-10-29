@@ -4,13 +4,13 @@ class AppModelImpl implements AppModel {
 
 	private String appName;
 	private String appPackage;
-	private int timeRemaining;
+	private int timePerDay;
 	private boolean isEnabled;
 
-	public AppModelImpl(String appName, String appPackage, int timeRemaining, boolean isEnabled) {
+	public AppModelImpl(String appName, String appPackage, int timePerDay, boolean isEnabled) {
 		this.appName = appName;
 		this.appPackage = appPackage;
-		this.timeRemaining = timeRemaining;
+		this.timePerDay = timePerDay;
 		this.isEnabled = isEnabled;
 	}
 
@@ -25,13 +25,13 @@ class AppModelImpl implements AppModel {
 	}
 
 	@Override
-	public void setTimeRemaining(int timeRemaining) {
-		this.timeRemaining = timeRemaining;
+	public void setTimePerDay(int timePerDay) {
+		this.timePerDay = timePerDay;
 	}
 
 	@Override
-	public int getTimeRemaining() {
-		return timeRemaining;
+	public int getTimePerDay() {
+		return timePerDay;
 	}
 
 	@Override

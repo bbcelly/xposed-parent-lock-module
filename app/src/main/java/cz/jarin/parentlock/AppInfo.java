@@ -19,9 +19,9 @@ public class AppInfo {
 
 	private StorageAppLock<String, Integer> storageAppLockPrefs;
 
-	public AppInfo(Context context) {
+	public AppInfo(Context context, StorageAppLock<String, Integer> storageAppLock) {
 		this.context = context;
-		storageAppLockPrefs = new StorageAppLockPrefs(context);
+		storageAppLockPrefs = storageAppLock;
 	}
 
 	public List<AppModel> getApps() {
@@ -35,7 +35,7 @@ public class AppInfo {
 			AppModel appModel = new AppModelImpl(
 					packageManager.getApplicationLabel(resolveInfo.activityInfo.applicationInfo).toString(),
 					resolveInfo.activityInfo.packageName,
-					storageAppLockPrefs.getRemainingTimePerDay(resolveInfo.activityInfo.packageName),
+					storageAppLockPrefs.getAppTimePerDay(resolveInfo.activityInfo.packageName),
 					storageAppLockPrefs.isEnabledAppLock(resolveInfo.activityInfo.packageName));
 			apps.add(appModel);
 		}

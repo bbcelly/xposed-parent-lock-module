@@ -6,6 +6,7 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
+import cz.jarin.parentlock.utils.StorageAppLock;
 import cz.jarin.parentlock.utils.StorageAppLockPrefs;
 
 public class AppListActivity extends AppCompatActivity {
@@ -21,6 +22,7 @@ public class AppListActivity extends AppCompatActivity {
 		mLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
 		listView.setLayoutManager(mLayoutManager);
 		listView.setItemAnimator(new DefaultItemAnimator());
-		listView.setAdapter(new AppListAdapter(new StorageAppLockPrefs(this), new AppInfo(this).getApps()));
+		StorageAppLock<String, Integer> storageAppLock = new StorageAppLockPrefs(this);
+		listView.setAdapter(new AppListAdapter(storageAppLock, new AppInfo(this, storageAppLock).getApps()));
 	}
 }

@@ -18,7 +18,7 @@ public class StorageAppLockPrefs implements StorageAppLock<String, Integer> {
 	private final SharedPreferences sharedPreferences;
 
 	public StorageAppLockPrefs(Context context) {
-		sharedPreferences = context.getSharedPreferences(prefsName, MODE_WORLD_READABLE);
+		sharedPreferences = context.getSharedPreferences(prefsName, Context.MODE_PRIVATE);
 	}
 
 	@Override

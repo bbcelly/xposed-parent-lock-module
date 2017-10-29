@@ -6,9 +6,9 @@ public interface AppModel {
 
 	String getAppPackage();
 
-	void setTimeRemaining(int timeRemaining);
+	void setTimePerDay(int timePerDay);
 
-	int getTimeRemaining();
+	int getTimePerDay();
 
 	void setEnabled(boolean isEnabled);
 

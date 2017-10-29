@@ -9,8 +9,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.NumberPicker;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -42,7 +42,7 @@ public class AppListAdapter extends RecyclerView.Adapter<AppListAdapter.RowViewH
 		AppModel model = apps.get(position);
 		holder.appModel = model;
 		holder.appTitle.setText(model.getAppName());
-		holder.appTime.setText("Time remaining: " + model.getTimeRemaining());
+		holder.appTime.setText("Time per day: " + getTime(getTime(storageAppLock.getAppTimePerDay(model.getAppPackage()))));
 		holder.appEnable.setChecked(storageAppLock.isEnabledAppLock(model.getAppPackage()));
 	}
 
@@ -83,27 +83,62 @@ public class AppListAdapter extends RecyclerView.Adapter<AppListAdapter.RowViewH
 				public void onClick(View v) {
 					Context context = v.getContext();
 					AlertDialog.Builder builder = new AlertDialog.Builder(context);
-					builder.setTitle("Set max usage time per day");
+					builder.setTitle("Set H:M:S usage per day");
 
 					LinearLayout llDialog = new LinearLayout(context);
-					llDialog.setOrientation(LinearLayout.VERTICAL);
+					llDialog.setOrientation(LinearLayout.HORIZONTAL);
 
-					final EditText etTime = new EditText(context);
-					etTime.setText(String.valueOf(appModel.getTimeRemaining()), TextView.BufferType.EDITABLE);
-					etTime.setTextColor(0xff000000);
-					LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-					llDialog.addView(etTime, llp);
+					LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+
+					int timeSeconds = appModel.getTimePerDay();
+					final int[] time = getTime(timeSeconds);
+
+					final NumberPicker npHours = new NumberPicker(context);
+					npHours.setMinValue(0);
+					npHours.setMaxValue(23);
+					npHours.setValue(time[0]);
+					npHours.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+						@Override
+						public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+							time[0] = newVal;
+						}
+					});
+					llDialog.addView(npHours, llp);
+
+					final NumberPicker npMinutes = new NumberPicker(context);
+					npMinutes.setMinValue(0);
+					npMinutes.setMaxValue(59);
+					npMinutes.setValue(time[1]);
+					npMinutes.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+						@Override
+						public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+							time[1] = newVal;
+						}
+					});
+					llDialog.addView(npMinutes, llp);
+
+					final NumberPicker npSeconds = new NumberPicker(context);
+					npSeconds.setMinValue(0);
+					npSeconds.setMaxValue(59);
+					npSeconds.setValue(time[2]);
+					npSeconds.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+						@Override
+						public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+							time[2] = newVal;
+						}
+					});
+					llDialog.addView(npSeconds, llp);
+
 
 					builder.setView(llDialog);
 					builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int which) {
-							String textOld = appTime.getText().toString();
-							String textNew = etTime.getText().toString();
-							if (!textNew.equals(textOld)) {
-								int timePerDay = Integer.parseInt(textNew);
-								appModel.setTimeRemaining(timePerDay);
-								storageAppLock.setAppTimePerDay(appModel.getAppPackage(), timePerDay);
-								appTime.setText("Time remaining: " + timePerDay);
+							int timeOld = appModel.getTimePerDay();
+							int timeNew = getTimeInt(time);
+							if (timeNew != timeOld) {
+								appModel.setTimePerDay(timeNew);
+								storageAppLock.setAppTimePerDay(appModel.getAppPackage(), timeNew);
+								appTime.setText("Time per day: " + getTime(time));
 							}
 							dialog.cancel();
 						}
@@ -117,6 +152,28 @@ public class AppListAdapter extends RecyclerView.Adapter<AppListAdapter.RowViewH
 				}
 			});
 		}
+	}
+
+	private String getTime(int[] timeHMS) {
+		String time = "";
+		if (timeHMS[0] < 10) time += "0";
+		time += timeHMS[0] + ":";
+		if (timeHMS[1] < 10) time += "0";
+		time += timeHMS[1] + ":";
+		if (timeHMS[2] < 10) time += "0";
+		time += timeHMS[2];
+		return time;
+	}
+
+	private int[] getTime(int timeSeconds) {
+		int timeH = timeSeconds / 3600;
+		int timeM = (timeSeconds - (timeH * 3600)) / 60;
+		int timeS = timeSeconds % 60;
+		return new int[]{timeH, timeM, timeS};
+	}
+
+	private int getTimeInt(int[] timeHMS) {
+		return timeHMS[0] * 3600 + timeHMS[1] * 60 + timeHMS[2];
 	}
 
 }
