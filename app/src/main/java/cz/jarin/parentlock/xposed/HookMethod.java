@@ -1,8 +1,13 @@
 package cz.jarin.parentlock.xposed;
 
+import android.app.Activity;
+import android.app.Application;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.widget.TextView;
+
+import java.util.HashMap;
 
 import cz.jarin.parentlock.LoginActivity;
 import de.robv.android.xposed.IXposedHookLoadPackage;
@@ -12,68 +17,75 @@ import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
+import static de.robv.android.xposed.XposedHelpers.getAdditionalInstanceField;
+import static de.robv.android.xposed.XposedHelpers.setAdditionalInstanceField;
 
 public class HookMethod implements IXposedHookLoadPackage {
 
-	@Override
-	public void handleLoadPackage(XC_LoadPackage.LoadPackageParam lpparam) throws Throwable {
+	public static final String INSTANCE_FIELD_HANDLER = "handler";
+	public static final String INSTANCE_FIELD_RUNNABLE = "runnable";
+	final HashMap<String, Long> tsPerPackage = new HashMap<>();
 
-		XposedBridge.log("+++++ Hook we are in SystemUI!21: " + lpparam.packageName);
+	@Override
+	public void handleLoadPackage(final XC_LoadPackage.LoadPackageParam lpparam) throws Throwable {
+
 		if (!lpparam.packageName.equals("eu.livesport.FlashScores_co_uk_plus"))  //tested app
 			return;
+		final String packageName = lpparam.packageName;
+		tsPerPackage.put(packageName, -1L);
 
-		XposedBridge.log("+++++ we are in SystemUI!");
+		final Runnable mainRunnable = new Runnable() {
 
-		findAndHookMethod("android.app.Activity", lpparam.classLoader, "onCreate", Bundle.class, new XC_MethodHook() {
+			@Override
+			public void run() {
+				long ts = tsPerPackage.get(packageName);
+				long timeInApp = 0;
+				if (ts != -1L) {
+					timeInApp = System.currentTimeMillis() - ts;
+				}
+				tsPerPackage.put(packageName, System.currentTimeMillis());
+				XposedBridge.log("+++++: RUN, " + packageName + ", " + timeInApp + "ms");
+			}
+		};
+
+		findAndHookMethod(android.app.Activity.class.getName(), lpparam.classLoader, "onResume", new XC_MethodHook() {
+			@Override
+			protected void beforeHookedMethod(final MethodHookParam param) throws Throwable {
+				final Handler h = new Handler(((Activity)param.thisObject).getMainLooper());
+				setAdditionalInstanceField(param.thisObject, INSTANCE_FIELD_HANDLER, h);
+				Runnable r = new Runnable() {
+					@Override
+					public void run() {
+						Handler h = (Handler)getAdditionalInstanceField(param.thisObject, INSTANCE_FIELD_HANDLER);
+						if (h == null) {
+							return;
+						}
+						mainRunnable.run();
+						h.postDelayed(this, 1000);
+					}
+				};
+				setAdditionalInstanceField(param.thisObject, INSTANCE_FIELD_RUNNABLE, r);
+				h.post(r);
+
+			}
+
+		});
+
+		findAndHookMethod(android.app.Activity.class.getName(), lpparam.classLoader, "onPause", new XC_MethodHook() {
 			@Override
 			protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-//				XposedBridge.log("+++++ before: ");
-//				// this will be called before the clock was updated by the original method
-////				TextView tv = (TextView) param.thisObject;
-////				String text = tv.getText().toString();
-////				tv.setText(text + " :)");
-////				tv.setTextColor(Color.RED);
-//				XSharedPreferences pref = new XSharedPreferences(LoginActivity.class.getPackage().getName()); // load the preferences using Xposed (necessary to be accessible from inside the hook, SharedPreferences() won't work)
-////				pref.makeWorldReadable();
-////				pref.reload();
-//				String prefString = pref.getString("xxx", "fail");
-//				XposedBridge.log("+++++ xxx3: " + prefString);
-				tst();
+				Handler h = (Handler)getAdditionalInstanceField(param.thisObject, INSTANCE_FIELD_HANDLER);
+				Runnable r = (Runnable)getAdditionalInstanceField(param.thisObject, INSTANCE_FIELD_RUNNABLE);
 
+				if (h != null && r != null) {
+					h.post(r);
+				}
+				setAdditionalInstanceField(param.thisObject, INSTANCE_FIELD_HANDLER, null);
+				setAdditionalInstanceField(param.thisObject, INSTANCE_FIELD_RUNNABLE, null);
+				tsPerPackage.put(packageName, -1L);
 			}
-			@Override
-			protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-				// this will be called after the clock was updated by the original method
-			}
+
 		});
-	}
-
-	void tst() {
-		XposedBridge.log("+++++ before: ");
-		// this will be called before the clock was updated by the original method
-//				TextView tv = (TextView) param.thisObject;
-//				String text = tv.getText().toString();
-//				tv.setText(text + " :)");
-//				tv.setTextColor(Color.RED);
-		XSharedPreferences pref = new XSharedPreferences(LoginActivity.class.getPackage().getName()); // load the preferences using Xposed (necessary to be accessible from inside the hook, SharedPreferences() won't work)
-//				pref.makeWorldReadable();
-//				pref.reload();
-		String prefString = pref.getString("xxx", "fail");
-		XposedBridge.log("+++++ xxx34: " + prefString);
-
-		XSharedPreferences pref2 = new XSharedPreferences(LoginActivity.class.getPackage().getName(), "asd"); // load the preferences using Xposed (necessary to be accessible from inside the hook, SharedPreferences() won't work)
-//				pref.makeWorldReadable();
-//				pref.reload();
-		String prefString2 = pref2.getString("xxx", "fail");
-		XposedBridge.log("+++++ xxx35: " + prefString2);
-
-		XSharedPreferences pref3 = new XSharedPreferences(LoginActivity.class.getPackage().getName(), "asdr"); // load the preferences using Xposed (necessary to be accessible from inside the hook, SharedPreferences() won't work)
-//				pref.makeWorldReadable();
-//				pref.reload();
-		String prefString3 = pref3.getString("xxx", "fail");
-		XposedBridge.log("+++++ xxx36: " + prefString3);
-
-
 	}
 
 }
