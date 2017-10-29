@@ -42,12 +42,12 @@
 			</intent-filter>
 		</activity>
 
-		<receiver android:name=".services.GetAppInfoService$Receiver"
+		<receiver android:name=".services.GetAppInfoBroadcastReceiver"
 				  android:exported="true"
 				  android:enabled="true">
 			<intent-filter>
 				<action
-					android:name="cz.jarin.parentlock.action.START_GET_APP_INFO_SERVICE"/>
+					android:name="android.intent.action.VIEW"/>
 			</intent-filter>
 		</receiver>
 

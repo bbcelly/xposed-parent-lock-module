@@ -21,21 +21,6 @@ public class GetAppInfoService extends IntentService {
 
 	private static StorageAppLock<String, Integer> storageAppLock;
 
-	public static class Receiver extends BroadcastReceiver {
-
-		public Receiver() {
-			super();
-//			XposedBridge.log("+++++ create: ");
-			Log.d(TAG, "create: +++++");
-		}
-
-		@Override
-		public void onReceive(Context context, Intent intent) {
-//			XposedBridge.log("+++++ receive: ");
-			Log.d(TAG, "receive: +++++");
-		}
-	}
-
 	public GetAppInfoService() {
 		super("GetAppInfoService");
 		storageAppLock = new StorageAppLockPrefs(getApplicationContext());
