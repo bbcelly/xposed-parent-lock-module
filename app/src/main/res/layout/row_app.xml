@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="40dp"
+	android:focusable="true"
+	android:clickable="true"
+	android:background="?android:attr/selectableItemBackground"
+	android:orientation="vertical"
+>
+
+	<CheckBox
+		android:id="@+id/app_enabled"
+		android:layout_width="40dp"
+		android:layout_height="match_parent"
+		android:layout_alignParentTop="true"
+		android:layout_alignParentBottom="true"
+		android:layout_alignParentRight="true"
+		android:layout_alignParentEnd="true"
+	/>
+
+	<TextView
+		android:id="@+id/app_title"
+		android:layout_width="0dp"
+		android:layout_height="25dp"
+		android:textColor="#000000"
+		android:textSize="18dp"
+		android:textStyle="bold"
+		android:layout_alignParentLeft="true"
+		android:layout_alignParentStart="true"
+		android:layout_alignParentTop="true"
+		android:layout_toLeftOf="@+id/app_enabled"
+		android:layout_toStartOf="@+id/app_enabled"
+	/>
+
+	<TextView
+		android:id="@+id/app_time"
+		android:layout_width="0dp"
+		android:layout_height="15dp"
+		android:textColor="#000000"
+		android:textSize="11dp"
+		android:layout_alignParentLeft="true"
+		android:layout_alignParentStart="true"
+		android:layout_alignParentBottom="true"
+		android:layout_toLeftOf="@+id/app_enabled"
+		android:layout_toStartOf="@+id/app_enabled"
+	/>
+
+</RelativeLayout>
