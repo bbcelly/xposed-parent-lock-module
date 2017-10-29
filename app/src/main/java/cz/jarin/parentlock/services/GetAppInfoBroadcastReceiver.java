@@ -11,15 +11,11 @@ import android.util.Log;
 
 public class GetAppInfoBroadcastReceiver extends BroadcastReceiver {
 	private static final String TAG = "GetAppInfoBR";
-	public GetAppInfoBroadcastReceiver() {
-		super();
-//			XposedBridge.log("+++++ create: ");
-		Log.d(TAG, "create: +++++");
-	}
+
+	public static final String START_GET_APP_INFO_SERVICE = "cz.jarin.parentlock.action.START_GET_APP_INFO_SERVICE";
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
-//			XposedBridge.log("+++++ receive: ");
 		Log.d(TAG, "receive: +++++");
 	}
 }

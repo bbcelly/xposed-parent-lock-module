@@ -47,7 +47,7 @@
 				  android:enabled="true">
 			<intent-filter>
 				<action
-					android:name="android.intent.action.VIEW"/>
+					android:name="cz.jarin.parentlock.action.START_GET_APP_INFO_SERVICE"/>
 			</intent-filter>
 		</receiver>
 
