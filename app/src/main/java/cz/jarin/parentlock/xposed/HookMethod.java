@@ -1,18 +1,12 @@
 package cz.jarin.parentlock.xposed;
 
 import android.app.Activity;
-import android.app.Application;
-import android.graphics.Color;
-import android.os.Bundle;
 import android.os.Handler;
-import android.widget.TextView;
 
 import java.util.HashMap;
 
-import cz.jarin.parentlock.LoginActivity;
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XC_MethodHook;
-import de.robv.android.xposed.XSharedPreferences;
 import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
@@ -29,8 +23,6 @@ public class HookMethod implements IXposedHookLoadPackage {
 	@Override
 	public void handleLoadPackage(final XC_LoadPackage.LoadPackageParam lpparam) throws Throwable {
 
-		if (!lpparam.packageName.equals("eu.livesport.FlashScores_co_uk_plus"))  //tested app
-			return;
 		final String packageName = lpparam.packageName;
 		tsPerPackage.put(packageName, -1L);
 
@@ -45,6 +37,7 @@ public class HookMethod implements IXposedHookLoadPackage {
 				}
 				tsPerPackage.put(packageName, System.currentTimeMillis());
 				XposedBridge.log("+++++: RUN, " + packageName + ", " + timeInApp + "ms");
+				//TODO: send info to our module
 			}
 		};
 
