@@ -3,6 +3,8 @@ package cz.jarin.parentlock.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import java.util.Date;
+
 import static android.content.Context.MODE_WORLD_READABLE;
 
 public class StorageAppLockPrefs implements StorageAppLock<String, Integer> {
@@ -11,6 +13,7 @@ public class StorageAppLockPrefs implements StorageAppLock<String, Integer> {
 	private static final String prefAppLockedSuffix = "_lck";
 	private static final String prefTimeSuffix = "_time";
 	private static final String prefTimeRemainingSuffix = "_timeR";
+	private static final String prefAppLastDayStartTime = "_ldst";
 
 	private final SharedPreferences sharedPreferences;
 
@@ -40,7 +43,7 @@ public class StorageAppLockPrefs implements StorageAppLock<String, Integer> {
 
 	@Override
 	public Integer getAppTimePerDay(String appId) {
-		return sharedPreferences.getInt(appId + prefTimeSuffix, Integer.MAX_VALUE);
+		return sharedPreferences.getInt(appId + prefTimeSuffix, 0);
 	}
 
 	@Override
@@ -50,12 +53,23 @@ public class StorageAppLockPrefs implements StorageAppLock<String, Integer> {
 
 	@Override
 	public Integer getRemainingTimePerDay(String appId) {
-		return sharedPreferences.getInt(appId + prefTimeRemainingSuffix, Integer.MAX_VALUE);
+		long todayStartTime = getTodayStartTime();
+		if (todayStartTime > sharedPreferences.getLong(appId + prefAppLastDayStartTime, 0)) {
+			setPrefLong(appId + prefAppLastDayStartTime, todayStartTime);
+			return getAppTimePerDay(appId);
+		}
+		return sharedPreferences.getInt(appId + prefTimeRemainingSuffix, 0);
 	}
 
 	private void setPrefString(String prefName, String prefValue) {
 		SharedPreferences.Editor editor = sharedPreferences.edit();
 		editor.putString(prefName, prefValue);
+		editor.apply();
+	}
+
+	private void setPrefLong(String prefName, Long prefValue) {
+		SharedPreferences.Editor editor = sharedPreferences.edit();
+		editor.putLong(prefName, prefValue);
 		editor.apply();
 	}
 
@@ -71,4 +85,9 @@ public class StorageAppLockPrefs implements StorageAppLock<String, Integer> {
 		editor.apply();
 	}
 
+	private long getTodayStartTime() {
+		long currentTime = new Date().getTime();
+		long todayTimeRest = currentTime % (24 * 3600 * 1000);
+		return currentTime - todayTimeRest;
+	}
 }

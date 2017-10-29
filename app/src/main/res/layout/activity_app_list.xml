@@ -7,14 +7,13 @@
 	android:layout_height="match_parent"
 	tools:context="cz.jarin.parentlock.AppListActivity">
 
-	<android.support.v7.widget.ListViewCompat
+	<android.support.v7.widget.RecyclerView
 		android:id="@+id/listApps"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
-		android:choiceMode="multipleChoice"
-		android:textFilterEnabled="true"
+		android:scrollbars="vertical"
 	>
 
-	</android.support.v7.widget.ListViewCompat>
+	</android.support.v7.widget.RecyclerView>
 
 </android.support.constraint.ConstraintLayout>

@@ -1,10 +1,16 @@
 package cz.jarin.parentlock;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -36,9 +42,8 @@ public class AppListAdapter extends RecyclerView.Adapter<AppListAdapter.RowViewH
 		AppModel model = apps.get(position);
 		holder.appModel = model;
 		holder.appTitle.setText(model.getAppName());
-		holder.appTime.setText(model.getTimeRemaining());
-//		holder.appEnable.setEnabled(model.isEnabled());
-		holder.appEnable.setEnabled(storageAppLock.isEnabledAppLock(model.getAppPackage()));
+		holder.appTime.setText("Time remaining: " + model.getTimeRemaining());
+		holder.appEnable.setChecked(storageAppLock.isEnabledAppLock(model.getAppPackage()));
 	}
 
 	@Override
@@ -61,25 +66,54 @@ public class AppListAdapter extends RecyclerView.Adapter<AppListAdapter.RowViewH
 			appTime = view.findViewById(R.id.app_time);
 			appEnable = view.findViewById(R.id.app_enabled);
 
-			appEnable.setOnClickListener(new View.OnClickListener() {
+			appEnable.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 				@Override
-				public void onClick(View v) {
-					boolean isEnabled = appEnable.isEnabled();
-					appModel.setEnabled(isEnabled);
-					if (isEnabled) {
+				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+					appModel.setEnabled(isChecked);
+					if (isChecked) {
 						storageAppLock.enableAppLock(appModel.getAppPackage());
 					} else {
 						storageAppLock.disableAppLock(appModel.getAppPackage());
 					}
-//					appModel = new A
 				}
 			});
 
 			view.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					//show dialog for modify time
-//					appModel.
+					Context context = v.getContext();
+					AlertDialog.Builder builder = new AlertDialog.Builder(context);
+					builder.setTitle("Set max usage time per day");
+
+					LinearLayout llDialog = new LinearLayout(context);
+					llDialog.setOrientation(LinearLayout.VERTICAL);
+
+					final EditText etTime = new EditText(context);
+					etTime.setText(String.valueOf(appModel.getTimeRemaining()), TextView.BufferType.EDITABLE);
+					etTime.setTextColor(0xff000000);
+					LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+					llDialog.addView(etTime, llp);
+
+					builder.setView(llDialog);
+					builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int which) {
+							String textOld = appTime.getText().toString();
+							String textNew = etTime.getText().toString();
+							if (!textNew.equals(textOld)) {
+								int timePerDay = Integer.parseInt(textNew);
+								appModel.setTimeRemaining(timePerDay);
+								storageAppLock.setAppTimePerDay(appModel.getAppPackage(), timePerDay);
+								appTime.setText("Time remaining: " + timePerDay);
+							}
+							dialog.cancel();
+						}
+					});
+					builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int which) {
+							dialog.cancel();
+						}
+					});
+					builder.show();
 				}
 			});
 		}

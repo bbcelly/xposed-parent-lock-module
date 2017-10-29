@@ -17,6 +17,8 @@
 		android:layout_alignParentBottom="true"
 		android:layout_alignParentRight="true"
 		android:layout_alignParentEnd="true"
+		android:focusable="true"
+		android:clickable="true"
 	/>
 
 	<TextView
